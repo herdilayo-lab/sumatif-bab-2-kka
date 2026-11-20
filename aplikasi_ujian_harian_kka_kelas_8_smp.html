@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian Harian KKA Kelas 8 - Diseminasi & Etika Konten Digital</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf.js untuk export PDF yang rapi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        },
+                        accent: {
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 50%, #f8fafc 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .option-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-card:hover {
+            transform: translateY(-2px);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .animate-pulse-soft {
+            animation: pulse-soft 2s infinite;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-primary-500 selection:text-white">
+
+    <!-- Custom Modal Notification (Pengganti alert/confirm) -->
+    <div id="custom-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 transition-opacity">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all scale-100">
+            <div class="flex items-center gap-3 mb-4">
+                <div id="modal-icon" class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 id="modal-title" class="font-display font-bold text-lg text-slate-900">Perhatian</h3>
+            </div>
+            <p id="modal-message" class="text-slate-600 text-sm leading-relaxed mb-6">Pesan notifikasi di sini.</p>
+            <div id="modal-actions" class="flex justify-end gap-3">
+                <button id="modal-cancel-btn" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+                <button id="modal-confirm-btn" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-primary-600 text-white hover:bg-primary-700 shadow-md shadow-primary-500/30 transition">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-40 glass-card border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center text-white shadow-md">
+                    <i class="fa-solid fa-robot text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-base sm:text-lg text-slate-900 leading-tight">Ujian Harian KKA</h1>
+                    <p class="text-xs text-slate-500 font-medium">Kelas VIII SMP • Koding & Kecerdasan Artifisial</p>
+                </div>
+            </div>
+
+            <!-- Timer & Status Badge (Muncul saat ujian berlangsung) -->
+            <div id="exam-header-controls" class="hidden items-center gap-3 sm:gap-4">
+                <div class="hidden sm:flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700">
+                    <i class="fa-solid fa-user-graduate text-primary-600"></i>
+                    <span id="header-student-name">Siswa</span>
+                </div>
+                <div class="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 px-3 py-1.5 rounded-xl font-mono font-bold text-sm shadow-inner">
+                    <i class="fa-regular fa-clock animate-pulse"></i>
+                    <span id="timer-display">30:00</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+
+        <!-- ========================================================= -->
+        <!-- 1. HALAMAN DASHBOARD AWAL (WELCOME & IDENTITAS SISWA)     -->
+        <!-- ========================================================= -->
+        <section id="view-dashboard" class="space-y-8">
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-900 via-primary-700 to-accent-600 text-white p-6 sm:p-10 shadow-xl">
+                <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/10 blur-2xl"></div>
+                <div class="absolute right-20 -bottom-20 w-72 h-72 rounded-full bg-accent-500/20 blur-2xl"></div>
+                
+                <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-semibold tracking-wide uppercase">
+                            <i class="fa-solid fa-sparkles text-amber-300"></i> Penilaian Sumatif Harian
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-4xl font-extrabold leading-tight">
+                            Diseminasi Konten Digital, Etika & Keamanan Siber
+                        </h2>
+                        <p class="text-primary-100 text-sm sm:text-base leading-relaxed max-w-2xl">
+                            Uji pemahamanmu dalam memproduksi, mengevaluasi, dan menyebarkan konten digital secara kreatif, etis, dan aman di era kecerdasan artifisial.
+                        </p>
+                        
+                        <!-- Info Badges -->
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <div class="flex items-center gap-2 bg-white/10 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium">
+                                <i class="fa-solid fa-list-check text-cyan-300"></i> 15 Soal Pilihan Ganda
+                            </div>
+                            <div class="flex items-center gap-2 bg-white/10 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium">
+                                <i class="fa-solid fa-stopwatch text-amber-300"></i> Waktu: 30 Menit
+                            </div>
+                            <div class="flex items-center gap-2 bg-white/10 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium">
+                                <i class="fa-solid fa-book-open-reader text-emerald-300"></i> Berbasis Literasi & Studi Kasus
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Mulai Ujian -->
+                    <div class="lg:col-span-5">
+                        <div class="bg-white text-slate-800 rounded-2xl p-6 shadow-2xl border border-white/40">
+                            <h3 class="font-display font-bold text-lg text-slate-900 mb-1">Data Peserta Ujian</h3>
+                            <p class="text-xs text-slate-500 mb-5">Lengkapi identitas sebelum memulai pengerjaan soal.</p>
+                            
+                            <form id="start-exam-form" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Lengkap Siswa</label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                            <i class="fa-solid fa-user"></i>
+                                        </span>
+                                        <input type="text" id="input-nama" required placeholder="Contoh: Ahmad Rizky Pratama"
+                                            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kelas</label>
+                                        <select id="input-kelas" required
+                                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                                            <option value="">Pilih Kelas</option>
+                                            <option value="VIII-A">VIII - A</option>
+                                            <option value="VIII-B">VIII - B</option>
+                                            <option value="VIII-C">VIII - C</option>
+                                            <option value="VIII-D">VIII - D</option>
+                                            <option value="VIII-E">VIII - E</option>
+                                            <option value="VIII-F">VIII - F</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">No. Absen</label>
+                                        <input type="number" id="input-absen" required min="1" max="50" placeholder="01"
+                                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition">
+                                    </div>
+                                </div>
+
+                                <button type="submit"
+                                    class="w-full mt-2 py-3 px-6 rounded-xl bg-gradient-to-r from-primary-600 to-accent-600 hover:from-primary-700 hover:to-accent-700 text-white font-display font-bold text-sm shadow-lg shadow-primary-500/30 flex items-center justify-center gap-2 transition transform active:scale-95">
+                                    <span>Mulai Ujian Sekarang</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kisi-Kisi & Tujuan Pembelajaran Dashboard Cards -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-display font-bold text-lg sm:text-xl text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-bullseye text-primary-600"></i> Tujuan Pembelajaran & Cakupan Materi
+                    </h3>
+                    <span class="text-xs font-semibold text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200">Total: 12 JP</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- TP 1 -->
+                    <div class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition border-t-4 border-t-indigo-500">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">TP 1</span>
+                            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">2 JP • 3 Soal</span>
+                        </div>
+                        <h4 class="font-display font-bold text-sm text-slate-900 mb-2">Konsep Dasar & Ancaman Digital</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Definisi & jenis konten digital, pentingnya etika, serta identifikasi risiko dan manfaat di ranah digital.
+                        </p>
+                    </div>
+
+                    <!-- TP 2 -->
+                    <div class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition border-t-4 border-t-cyan-500">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-9 h-9 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center font-bold text-sm">TP 2</span>
+                            <span class="text-xs font-bold text-cyan-600 bg-cyan-50 px-2.5 py-1 rounded-md">4 JP • 4 Soal</span>
+                        </div>
+                        <h4 class="font-display font-bold text-sm text-slate-900 mb-2">Produksi Konten & Hak Cipta</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Alat produksi kolaboratif (slide/infografis), prinsip desain visual dasar, hak cipta, dan lisensi Creative Commons.
+                        </p>
+                    </div>
+
+                    <!-- TP 3 -->
+                    <div class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition border-t-4 border-t-emerald-500">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm">TP 3</span>
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">3 JP • 4 Soal</span>
+                        </div>
+                        <h4 class="font-display font-bold text-sm text-slate-900 mb-2">Etika Interaksi & Privasi Data</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Netiket, pencegahan cyberbullying & hoaks, perlindungan data pribadi, jejak digital, dan keamanan akun.
+                        </p>
+                    </div>
+
+                    <!-- TP 4 -->
+                    <div class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition border-t-4 border-t-amber-500">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-9 h-9 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-sm">TP 4</span>
+                            <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md">3 JP • 4 Soal</span>
+                        </div>
+                        <h4 class="font-display font-bold text-sm text-slate-900 mb-2">Diseminasi Bertanggung Jawab</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Strategi diseminasi sesuai audiens & platform, pengaturan privasi, dampak penyebaran, dan verifikasi fakta.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- 2. HALAMAN PENGERJAAN SOAL UJIAN                          -->
+        <!-- ========================================================= -->
+        <section id="view-exam" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Kolom Kiri: Area Soal Utama -->
+                <div class="lg:col-span-8 space-y-5">
+                    <!-- Progress Bar Top -->
+                    <div class="glass-card rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex justify-between text-xs font-bold text-slate-600 mb-1.5">
+                                <span>Progres Pengerjaan</span>
+                                <span id="progress-text">0 / 15 Terjawab</span>
+                            </div>
+                            <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                                <div id="progress-bar" class="h-full bg-gradient-to-r from-primary-600 to-accent-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <span id="tp-badge" class="px-3 py-1.5 rounded-xl bg-primary-50 text-primary-700 border border-primary-200 text-xs font-bold shrink-0">
+                            TP 1
+                        </span>
+                    </div>
+
+                    <!-- Kartu Soal -->
+                    <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-md">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+                            <span class="font-display font-extrabold text-lg sm:text-xl text-primary-700">
+                                Soal Nomor <span id="current-q-number">1</span>
+                            </span>
+                            <button id="flag-btn" onclick="toggleFlag()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200 transition">
+                                <i class="fa-regular fa-flag"></i> Tandai Ragu-ragu
+                            </button>
+                        </div>
+
+                        <!-- Kontainer Stimulus (Teks Literasi / Studi Kasus / Gambar SVG) -->
+                        <div id="stimulus-container" class="mb-6">
+                            <!-- Diisi secara dinamis oleh JS -->
+                        </div>
+
+                        <!-- Pertanyaan -->
+                        <div id="question-text" class="text-slate-900 font-semibold text-base sm:text-lg leading-relaxed mb-6">
+                            <!-- Diisi secara dinamis oleh JS -->
+                        </div>
+
+                        <!-- Pilihan Jawaban A - D -->
+                        <div id="options-container" class="space-y-3">
+                            <!-- Diisi secara dinamis oleh JS -->
+                        </div>
+
+                        <!-- Navigasi Bawah Soal -->
+                        <div class="flex items-center justify-between pt-8 mt-8 border-t border-slate-100">
+                            <button id="prev-btn" onclick="prevQuestion()" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm flex items-center gap-2 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-chevron-left"></i> Sebelumnya
+                            </button>
+
+                            <button id="next-btn" onclick="nextQuestion()" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm flex items-center gap-2 shadow-md shadow-primary-500/20 transition">
+                                Selanjutnya <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+
+                            <button id="finish-btn" onclick="confirmFinishExam()" class="hidden px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm items-center gap-2 shadow-lg shadow-emerald-500/30 transition">
+                                <i class="fa-solid fa-paper-plane"></i> Selesai & Lihat Hasil
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kolom Kanan: Navigasi Nomor Soal -->
+                <div class="lg:col-span-4 space-y-4 lg:sticky lg:top-24">
+                    <div class="glass-card rounded-3xl p-6 shadow-md">
+                        <h3 class="font-display font-bold text-base text-slate-900 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-grid-2 text-primary-600"></i> Navigasi Soal
+                        </h3>
+                        
+                        <!-- Grid 15 Nomor -->
+                        <div id="question-nav-grid" class="grid grid-cols-5 gap-2.5 mb-6">
+                            <!-- Tombol 1-15 di-generate via JS -->
+                        </div>
+
+                        <!-- Legenda -->
+                        <div class="grid grid-cols-2 gap-2 text-xs text-slate-600 border-t border-slate-100 pt-4 mb-6">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3.5 h-3.5 rounded bg-primary-600 inline-block"></span> Terjawab
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3.5 h-3.5 rounded bg-amber-400 inline-block"></span> Ragu-ragu
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3.5 h-3.5 rounded border-2 border-primary-600 bg-white inline-block"></span> Aktif
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3.5 h-3.5 rounded bg-slate-100 border border-slate-300 inline-block"></span> Belum Dijawab
+                            </div>
+                        </div>
+
+                        <button onclick="confirmFinishExam()" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-display font-bold text-sm shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 transition">
+                            <i class="fa-solid fa-circle-check"></i> Kumpulkan Jawaban
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- 3. HALAMAN HASIL UJIAN, EXPORT PDF & KIRIM WHATSAPP       -->
+        <!-- ========================================================= -->
+        <section id="view-result" class="hidden space-y-6">
+            
+            <!-- Action Bar (Kirim WA, Download PDF, Ulangi) -->
+            <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 border border-primary-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-display font-bold text-base sm:text-lg text-slate-900">Ujian Telah Selesai!</h2>
+                        <p class="text-xs text-slate-500">Kirim hasil ke guru via WhatsApp atau unduh bukti PDF.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
+                    <button onclick="sendToWhatsApp()" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold text-sm shadow-lg shadow-green-500/30 flex items-center justify-center gap-2 transition transform active:scale-95">
+                        <i class="fa-brands fa-whatsapp text-lg"></i> Kirim ke WA Guru
+                    </button>
+                    <button onclick="downloadPDF()" id="btn-download-pdf" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-lg shadow-rose-500/30 flex items-center justify-center gap-2 transition transform active:scale-95">
+                        <i class="fa-solid fa-file-pdf text-base"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- AREA LAPORAN YANG AKAN DI-EXPORT KE PDF -->
+            <div id="pdf-report-area" class="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border border-slate-200 space-y-8">
+                
+                <!-- Kop Laporan Hasil Ujian -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-slate-800 pb-6 gap-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-primary-600">Laporan Hasil Evaluasi Belajar</span>
+                        <h1 class="font-display font-extrabold text-2xl text-slate-900 mt-1">Ujian Harian Koding & AI (KKA)</h1>
+                        <p class="text-sm text-slate-600">Materi: Diseminasi Konten Digital, Etika & Keamanan Siber (Kelas VIII SMP)</p>
+                    </div>
+                    <div class="text-left sm:text-right text-xs text-slate-500 space-y-1">
+                        <p class="font-semibold text-slate-700" id="res-timestamp">Waktu Selesai: -</p>
+                        <p>KKTP / KKM: <span class="font-bold text-slate-800">75</span></p>
+                    </div>
+                </div>
+
+                <!-- Identitas & Kartu Skor Utama -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center bg-slate-50 p-6 rounded-2xl border border-slate-200/80">
+                    <!-- Identitas Siswa -->
+                    <div class="md:col-span-7 space-y-2.5">
+                        <div class="grid grid-cols-3 text-sm">
+                            <span class="text-slate-500 font-medium">Nama Siswa</span>
+                            <span class="col-span-2 font-bold text-slate-900" id="res-nama">-</span>
+                        </div>
+                        <div class="grid grid-cols-3 text-sm">
+                            <span class="text-slate-500 font-medium">Kelas / Absen</span>
+                            <span class="col-span-2 font-bold text-slate-900" id="res-kelas-absen">-</span>
+                        </div>
+                        <div class="grid grid-cols-3 text-sm">
+                            <span class="text-slate-500 font-medium">Durasi Pengerjaan</span>
+                            <span class="col-span-2 font-semibold text-slate-800" id="res-durasi">-</span>
+                        </div>
+                        <div class="grid grid-cols-3 text-sm items-center pt-1">
+                            <span class="text-slate-500 font-medium">Status Kelulusan</span>
+                            <div class="col-span-2">
+                                <span id="res-status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                    LULUS KKTP
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skor Besar -->
+                    <div class="md:col-span-5 flex items-center justify-around bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="text-center">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Nilai Akhir</p>
+                            <div id="res-score" class="font-display font-extrabold text-4xl sm:text-5xl text-primary-600">0</div>
+                        </div>
+                        <div class="h-12 w-px bg-slate-200"></div>
+                        <div class="space-y-1.5 text-xs font-semibold">
+                            <div class="flex items-center gap-2 text-emerald-600">
+                                <i class="fa-solid fa-circle-check"></i> Benar: <span id="res-correct" class="font-bold">0</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-rose-600">
+                                <i class="fa-solid fa-circle-xmark"></i> Salah: <span id="res-wrong" class="font-bold">0</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-slate-500">
+                                <i class="fa-solid fa-list-ol"></i> Total: 15 Soal
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analisis Ketercapaian per Tujuan Pembelajaran (TP) -->
+                <div>
+                    <h3 class="font-display font-bold text-base text-slate-900 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-primary-600"></i> Analisis Ketercapaian Tujuan Pembelajaran
+                    </h3>
+                    <div id="tp-analysis-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <!-- Diisi via JS -->
+                    </div>
+                </div>
+
+                <!-- Rekapitulasi & Pembahasan Jawaban Siswa -->
+                <div>
+                    <h3 class="font-display font-bold text-base text-slate-900 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-file-signature text-primary-600"></i> Rincian Pilihan Jawaban Siswa
+                    </h3>
+                    <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                                    <th class="py-3 px-4 font-bold w-12 text-center">No</th>
+                                    <th class="py-3 px-4 font-bold">Ringkasan Pertanyaan & TP</th>
+                                    <th class="py-3 px-4 font-bold w-36 text-center">Jawaban Siswa</th>
+                                    <th class="py-3 px-4 font-bold w-24 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="review-table-body" class="divide-y divide-slate-200">
+                                <!-- Diisi via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-6xl mx-auto px-4 sm:px-6 py-8 text-center text-xs text-slate-500">
+        <p>© 2026 Evaluasi Pembelajaran Koding & Kecerdasan Artifisial (KKA) • Kelas VIII SMP</p>
+    </footer>
+
+    <!-- ========================================================= -->
+    <!-- JAVASCRIPT LOGIC & BANK SOAL                              -->
+    <!-- ========================================================= -->
+    <script>
+        // Nomor WhatsApp Guru Tujuan
+        const TEACHER_WA_NUMBER = "6281372966011"; // Format internasional untuk 081372966011
+
+        // Bank Soal 15 Nomor (Berbasis Literasi, Kontekstual, Stimulus Gambar SVG, Sesuai 4 TP)
+        const questionsData = [
+            // ================= TP 1 (Soal 1 - 3) =================
+            {
+                id: 1,
+                tp: "TP 1",
+                tpTitle: "Konsep Dasar & Ancaman Digital",
+                stimulusType: "text",
+                stimulusTitle: "Bacalah kutipan artikel berikut dengan cermat!",
+                stimulusContent: `Dalam ekosistem pembelajaran modern, guru sering membagikan materi melalui berbagai format konten digital: mulai dari artikel blog (teks), infografis statistik (gambar), podcast diskusi (audio), hingga video simulasi interaktif. Konten digital memiliki keunggulan mudah digandakan dan disebarkan dalam hitungan detik. Namun, sifatnya yang mudah dimodifikasi juga membuka celah penyalahgunaan, seperti manipulasi informasi berbasis AI (deepfake) dan pencurian data.`,
+                question: "Berdasarkan bacaan di atas, mengapa pemahaman etika dan keamanan digital menjadi sangat krusial saat berinteraksi dengan konten digital?",
+                options: [
+                    "Karena konten digital hanya dapat diakses menggunakan perangkat komputer berspesifikasi tinggi.",
+                    "Karena sifat konten digital yang mudah digandakan dan dimodifikasi berisiko memicu penyalahgunaan informasi dan pencurian data.",
+                    "Karena semua konten digital di internet dilindungi secara otomatis oleh sistem keamanan pemerintah.",
+                    "Karena konten berbentuk audio dan video tidak memerlukan izin pemilik saat disebarkan ulang."
+                ],
+                correct: 1,
+                shortTopic: "Urgensi etika dan keamanan dalam ekosistem konten digital"
+            },
+            {
+                id: 2,
+                tp: "TP 1",
+                tpTitle: "Konsep Dasar & Ancaman Digital",
+                stimulusType: "svg",
+                stimulusTitle: "Perhatikan ilustrasi pesan masuk pada ponsel berikut!",
+                stimulusSVG: `
+                    <div class="bg-slate-900 p-4 rounded-2xl max-w-md mx-auto border border-slate-700 shadow-inner">
+                        <div class="bg-slate-800 rounded-xl p-3.5 text-xs text-slate-200 space-y-2 border-l-4 border-rose-500">
+                            <div class="flex items-center justify-between text-slate-400 text-[11px]">
+                                <span><i class="fa-solid fa-comment-sms text-rose-400 mr-1"></i> +62 899-XXXX-112</span>
+                                <span>Baru saja</span>
+                            </div>
+                            <p class="font-semibold text-white">SELAMAT! Akun E-Wallet Anda terpilih mendapatkan bantuan kuota belajar Rp500.000.</p>
+                            <p class="text-slate-300">Segera klaim sebelum hangus dalam 10 menit dengan memasukkan PIN dan Kode OTP Anda di tautan berikut:</p>
+                            <div class="bg-slate-950 px-3 py-1.5 rounded text-cyan-400 font-mono text-[11px] underline">
+                                http://klaim-kuota-gratis-resmi.xyz/login
+                            </div>
+                        </div>
+                    </div>
+                `,
+                question: "Jenis ancaman keamanan digital yang ditunjukkan pada stimulus gambar pesan singkat di atas beserta tindakan pencegahan yang paling tepat adalah...",
+                options: [
+                    "Malware; mencegahnya dengan mematikan koneksi Wi-Fi selama 24 jam.",
+                    "Cyberbullying; mencegahnya dengan membalas pesan tersebut menggunakan kata-kata tegas.",
+                    "Phishing; mencegahnya dengan tidak mengeklik tautan mencurigakan serta merahasiakan PIN dan kode OTP.",
+                    "Spamming; mencegahnya dengan memasukkan PIN yang salah agar sistem pelaku terblokir."
+                ],
+                correct: 2,
+                shortTopic: "Identifikasi ancaman Phishing melalui tautan palsu"
+            },
+            {
+                id: 3,
+                tp: "TP 1",
+                tpTitle: "Konsep Dasar & Ancaman Digital",
+                stimulusType: "text",
+                stimulusTitle: "Studi Kasus: Pemanfaatan AI dalam Pembuatan Konten",
+                stimulusContent: `Rina menggunakan aplikasi Kecerdasan Artifisial (AI) generatif untuk membantu membuat ilustrasi poster kampanye kebersihan sekolah. Di sisi lain, temannya menggunakan AI yang sama untuk membuat suara tiruan kepala sekolah yang seolah-olah mengumumkan libur mendadak, lalu menyebarkannya ke grup kelas.`,
+                question: "Analisis yang tepat mengenai perbandingan manfaat dan risiko teknologi digital berdasarkan kasus Rina dan temannya adalah...",
+                options: [
+                    "Teknologi AI sepenuhnya berbahaya sehingga harus dilarang penggunaannya di lingkungan sekolah.",
+                    "Manfaat dan risiko teknologi digital bergantung pada etika penggunanya; AI dapat meningkatkan kreativitas namun berisiko menjadi alat disinformasi jika disalahgunakan.",
+                    "Tindakan teman Rina termasuk pemanfaatan konten digital yang kreatif karena menghibur teman sekelas.",
+                    "Rina melanggar etika digital karena menggunakan bantuan AI untuk tugas sekolah."
+                ],
+                correct: 1,
+                shortTopic: "Analisis manfaat dan risiko pemanfaatan AI generatif"
+            },
+
+            // ================= TP 2 (Soal 4 - 7) =================
+            {
+                id: 4,
+                tp: "TP 2",
+                tpTitle: "Produksi Konten & Hak Cipta",
+                stimulusType: "svg",
+                stimulusTitle: "Perhatikan perbandingan dua rancangan slide presentasi berikut!",
+                stimulusSVG: `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                        <!-- Slide A (Buruk) -->
+                        <div class="bg-yellow-300 p-4 rounded-xl border-2 border-red-500 text-yellow-100 shadow-sm">
+                            <div class="text-[10px] font-bold uppercase text-red-700 bg-white/80 inline-block px-2 py-0.5 rounded mb-2">Desain Slide A</div>
+                            <p class="text-[11px] leading-tight text-white font-serif drop-shadow">
+                                Dampak sampah plastik bagi ekosistem laut sangat berbahaya karena mikroplastik dapat termakan oleh ikan kecil lalu berpindah ke rantai makanan manusia sehingga menyebabkan berbagai gangguan kesehatan kronis di masa depan apabila tidak segera dikurangi...
+                            </p>
+                        </div>
+                        <!-- Slide B (Baik) -->
+                        <div class="bg-slate-900 p-4 rounded-xl border-2 border-emerald-500 text-white shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div class="text-[10px] font-bold uppercase text-emerald-300 bg-emerald-950 inline-block px-2 py-0.5 rounded mb-2">Desain Slide B</div>
+                                <h4 class="font-bold text-sm text-cyan-400 mb-1">Bahaya Mikroplastik Laut</h4>
+                                <ul class="text-xs text-slate-200 list-disc pl-4 space-y-0.5">
+                                    <li>Termakan biota laut</li>
+                                    <li>Masuk rantai makanan manusia</li>
+                                    <li>Picu gangguan kesehatan</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                question: "Berdasarkan prinsip dasar desain visual, mengapa Desain Slide B jauh lebih efektif digunakan sebagai media presentasi dibandingkan Desain Slide A?",
+                options: [
+                    "Slide A menggunakan terlalu banyak ikon grafis sehingga menutupi teks utama.",
+                    "Slide B menerapkan kontras warna yang jelas (teks terang di latar gelap) serta meringkas informasi menjadi poin-poin inti agar mudah dibaca.",
+                    "Slide A memiliki ukuran huruf yang terlalu besar sehingga audiens cepat bosan.",
+                    "Slide B menggunakan warna cerah yang menyilaukan mata sehingga menarik perhatian dari jarak jauh."
+                ],
+                correct: 1,
+                shortTopic: "Prinsip desain visual: kontras warna dan hierarki teks"
+            },
+            {
+                id: 5,
+                tp: "TP 2",
+                tpTitle: "Produksi Konten & Hak Cipta",
+                stimulusType: "text",
+                stimulusTitle: "Kolaborasi Pembuatan Infografis",
+                stimulusContent: `Kelompok 3 yang beranggotakan Budi, Siti, dan Edo mendapat tugas membuat infografis tentang "Pencegahan Stunting" dalam waktu 2 hari. Karena rumah mereka berjauhan, mereka sepakat mengerjakan proyek tersebut secara daring menggunakan aplikasi desain berbasis cloud (seperti Canva atau Google Slides).`,
+                question: "Fitur kolaborasi yang paling tepat dimanfaatkan oleh Kelompok 3 agar pengerjaan infografis berjalan efisien dan terhindar dari kesalahan edit adalah...",
+                options: [
+                    "Mengirimkan file mentah bolak-balik melalui email setiap kali ada perubahan satu kalimat.",
+                    "Membagikan tautan akses 'Dapat Mengedit' (Can Edit) kepada anggota kelompok dan menggunakan fitur komentar untuk memberi masukan.",
+                    "Mengatur akses dokumen menjadi 'Publik di Web' agar siapa saja di internet dapat ikut mengubah desain.",
+                    "Mengerjakan desain di komputer masing-masing secara terpisah lalu menggabungkannya dengan cara difoto."
+                ],
+                correct: 1,
+                shortTopic: "Pemanfaatan alat produksi konten kolaboratif berbasis cloud"
+            },
+            {
+                id: 6,
+                tp: "TP 2",
+                tpTitle: "Produksi Konten & Hak Cipta",
+                stimulusType: "svg",
+                stimulusTitle: "Perhatikan simbol lisensi Creative Commons pada sebuah foto di internet!",
+                stimulusSVG: `
+                    <div class="bg-slate-100 border border-slate-300 rounded-2xl p-4 max-w-md mx-auto flex items-center gap-4">
+                        <div class="flex items-center gap-1.5 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm shrink-0">
+                            <span class="w-8 h-8 rounded-full bg-slate-800 text-white font-bold text-xs flex items-center justify-center">CC</span>
+                            <span class="w-8 h-8 rounded-full bg-slate-800 text-white font-bold text-[10px] flex items-center justify-center">BY</span>
+                            <span class="w-8 h-8 rounded-full bg-slate-800 text-white font-bold text-[10px] flex items-center justify-center">NC</span>
+                        </div>
+                        <div class="text-xs text-slate-700">
+                            <p class="font-bold text-slate-900">Lisensi: CC BY-NC 4.0</p>
+                            <p class="text-slate-500 mt-0.5">Karya Fotografi: "Hutan Mangrove Pesisir" oleh Fotografer: Dimas Pratama.</p>
+                        </div>
+                    </div>
+                `,
+                question: "Jika kamu ingin menggunakan foto berlisensi CC BY-NC di atas ke dalam infografis tugas sekolahmu, syarat hukum dan etika yang wajib kamu penuhi adalah...",
+                options: [
+                    "Bebas digunakan tanpa mencantumkan nama Dimas Pratama, dan boleh dijual kembali.",
+                    "Wajib mencantumkan atribusi (nama pencipta: Dimas Pratama) dan hanya digunakan untuk tujuan non-komersial (pendidikan/bukan untuk dijual).",
+                    "Harus membayar royalti kepada Dimas Pratama sebelum mengunduh foto tersebut.",
+                    "Tidak boleh mengubah ukuran foto dan dilarang menggunakannya untuk tugas sekolah."
+                ],
+                correct: 1,
+                shortTopic: "Memahami lisensi Creative Commons (CC BY-NC) dan atribusi"
+            },
+            {
+                id: 7,
+                tp: "TP 2",
+                tpTitle: "Produksi Konten & Hak Cipta",
+                stimulusType: "text",
+                stimulusTitle: "Studi Kasus: Atribusi Sumber Data",
+                stimulusContent: `Dalam menyusun slide presentasi tentang "Perkembangan Pengguna Internet di Indonesia", Nabila mengambil grafik data survei dari situs resmi APJII (Asosiasi Penyelenggara Jasa Internet Indonesia) dan memasukkannya ke dalam slide tanpa menuliskan sumber maupun tautan rujukannya.`,
+                question: "Dampak negatif dari tindakan Nabila yang tidak mencantumkan atribusi sumber pada konten digitalnya adalah...",
+                options: [
+                    "Ukuran file presentasi menjadi terlalu besar sehingga sulit dikirim.",
+                    "Tindakan tersebut termasuk plagiarisme dan menurunkan kredibilitas (tingkat kepercayaan) informasi yang disajikan.",
+                    "Grafik yang ditampilkan akan otomatis terhapus oleh sistem komputer.",
+                    "Audiens akan menganggap Nabila sebagai peneliti resmi dari lembaga APJII."
+                ],
+                correct: 1,
+                shortTopic: "Pentingnya atribusi sumber untuk mencegah plagiarisme"
+            },
+
+            // ================= TP 3 (Soal 8 - 11) =================
+            {
+                id: 8,
+                tp: "TP 3",
+                tpTitle: "Etika Interaksi & Privasi Data",
+                stimulusType: "text",
+                stimulusTitle: "Perhatikan interaksi pada kolom komentar media sosial berikut!",
+                stimulusContent: `Seorang siswa mengunggah video karya puisi di media sosial sekolah. Di kolom komentar, muncul beberapa akun yang menuliskan: "Suaramu cempreng banget, nggak cocok baca puisi! Mending hapus aja videonya, bikin malu sekolah!" Komentar tersebut kemudian disukai oleh puluhan akun lain sehingga membuat pembuat video merasa tertekan dan takut masuk sekolah.`,
+                question: "Perilaku pada kolom komentar tersebut merupakan bentuk pelanggaran etika digital berupa...",
+                options: [
+                    "Kritik konstruktif untuk meningkatkan kualitas karya seni siswa.",
+                    "Cyberbullying (perundungan siber) yang dapat merusak kesehatan mental korban.",
+                    "Pelanggaran hak cipta karena mengomentari karya orang lain tanpa izin.",
+                    "Doxing karena menyebarkan lokasi sekolah korban."
+                ],
+                correct: 1,
+                shortTopic: "Identifikasi tindakan cyberbullying di media sosial"
+            },
+            {
+                id: 9,
+                tp: "TP 3",
+                tpTitle: "Etika Interaksi & Privasi Data",
+                stimulusType: "svg",
+                stimulusTitle: "Perhatikan unggahan foto di Instagram Story seorang pelajar berikut!",
+                stimulusSVG: `
+                    <div class="bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 p-1 rounded-2xl max-w-sm mx-auto shadow-md">
+                        <div class="bg-white rounded-xl p-4 space-y-2.5">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-700">AR</div>
+                                <span class="text-xs font-bold text-slate-800">@arjun_smp8</span>
+                                <span class="text-[10px] text-slate-400">• Publik</span>
+                            </div>
+                            <div class="bg-sky-50 border border-sky-200 rounded-lg p-3 text-center space-y-1">
+                                <i class="fa-solid fa-id-card text-sky-600 text-2xl"></i>
+                                <p class="font-bold text-xs text-slate-800">KARTU PELAJAR & TIKET PESAWAT</p>
+                                <p class="text-[11px] text-slate-600">NISN: 0098123456 • Kode Booking: X7K9LP</p>
+                                <p class="text-[10px] text-slate-500">Alamat: Jl. Melati No. 14, Palembang</p>
+                            </div>
+                            <p class="text-xs text-slate-700">Yeay akhirnya liburan ke Bali! Rumah kosong 1 minggu ✈️</p>
+                        </div>
+                    </div>
+                `,
+                question: "Kesalahan fatal terkait perlindungan privasi data yang dilakukan oleh pemilik akun @arjun_smp8 adalah...",
+                options: [
+                    "Menggunakan filter warna yang kurang menarik pada unggahan Story.",
+                    "Mengunggah data pribadi sensitif (NISN, alamat rumah, kode booking) serta menginformasikan rumah dalam keadaan kosong ke publik.",
+                    "Tidak menandai (tag) akun maskapai penerbangan pada unggahannya.",
+                    "Mengunggah foto tiket pesawat sebelum waktu keberangkatan tiba."
+                ],
+                correct: 1,
+                shortTopic: "Perlindungan data pribadi sensitif dan risiko oversharing"
+            },
+            {
+                id: 10,
+                tp: "TP 3",
+                tpTitle: "Etika Interaksi & Privasi Data",
+                stimulusType: "text",
+                stimulusTitle: "Literasi Jejak Digital (Digital Footprint)",
+                stimulusContent: `Saat mendaftar beasiswa SMA unggulan pada tahun 2029 nanti, panitia seleksi melakukan penelusuran rekam jejak digital calon penerima beasiswa. Mereka menemukan bahwa salah satu pelamar pernah mengunggah ujaran kebencian dan kata-kata kasar di forum publik saat masih duduk di bangku kelas 8 SMP.`,
+                question: "Kesimpulan yang paling tepat mengenai karakteristik jejak digital berdasarkan ilustrasi di atas adalah...",
+                options: [
+                    "Jejak digital akan otomatis terhapus setiap pergantian tahun ajaran baru.",
+                    "Jejak digital bersifat permanen, sulit dihapus sepenuhnya, dan dapat memengaruhi reputasi seseorang di masa depan.",
+                    "Jejak digital hanya dapat dilihat oleh pengguna yang berteman di media sosial yang sama.",
+                    "Komentar yang ditulis saat masih remaja tidak tercatat dalam riwayat internet."
+                ],
+                correct: 1,
+                shortTopic: "Konsep jejak digital pasif/aktif dan dampaknya di masa depan"
+            },
+            {
+                id: 11,
+                tp: "TP 3",
+                tpTitle: "Etika Interaksi & Privasi Data",
+                stimulusType: "text",
+                stimulusTitle: "Keamanan Akun dan Kata Sandi",
+                stimulusContent: `Dina menggunakan kata sandi "dina12345" untuk semua akun media sosial, email, dan aplikasi belajarnya agar mudah diingat. Suatu hari, salah satu situs game yang pernah ia daftari mengalami kebocoran data (data breach), sehingga peretas berhasil mengambil alih akun email utama Dina.`,
+                question: "Dua langkah pengamanan terbaik yang seharusnya diterapkan Dina untuk mencegah pengambilalihan akun tersebut adalah...",
+                options: [
+                    "Mengganti kata sandi menjadi tanggal lahirnya dan menuliskannya di bio profil media sosial.",
+                    "Menggunakan kata sandi yang kuat dan berbeda untuk setiap akun, serta mengaktifkan Autentikasi Dua Faktor (2FA).",
+                    "Menghapus seluruh aplikasi belajar dan hanya menggunakan satu alamat email untuk semua situs.",
+                    "Membagikan kata sandi kepada teman dekat agar bisa membantu memantau akun jika diretas."
+                ],
+                correct: 1,
+                shortTopic: "Keamanan kata sandi kuat dan Autentikasi Dua Faktor (2FA)"
+            },
+
+            // ================= TP 4 (Soal 12 - 15) =================
+            {
+                id: 12,
+                tp: "TP 4",
+                tpTitle: "Diseminasi Bertanggung Jawab",
+                stimulusType: "text",
+                stimulusTitle: "Strategi Diseminasi Konten Sesuai Audiens",
+                stimulusContent: `OSIS SMP Negeri 1 membuat dua jenis konten edukasi tentang "Bahaya Rokok Elektrik (Vape)". Konten pertama berupa video pendek berdurasi 45 detik dengan musik tren dan bahasa gaul yang santai. Konten kedua berupa dokumen infografis formal berisi data medis dan regulasi kesehatan.`,
+                question: "Strategi pemilihan platform diseminasi yang paling tepat sasaran berdasarkan karakteristik audiensnya adalah...",
+                options: [
+                    "Video pendek disebarkan melalui surat resmi tercetak, sedangkan infografis formal diunggah ke TikTok.",
+                    "Video pendek didiseminasikan melalui Instagram Reels/TikTok untuk audiens pelajar, sedangkan infografis formal dibagikan melalui grup WhatsApp orang tua/komite sekolah.",
+                    "Kedua konten hanya disimpan di komputer ruang OSIS agar tidak ditiru sekolah lain.",
+                    "Infografis formal dikirimkan melalui pesan SMS berantai ke nomor acak."
+                ],
+                correct: 1,
+                shortTopic: "Pemilihan platform diseminasi sesuai target audiens"
+            },
+            {
+                id: 13,
+                tp: "TP 4",
+                tpTitle: "Diseminasi Bertanggung Jawab",
+                stimulusType: "svg",
+                stimulusTitle: "Perhatikan pesan berantai yang beredar di grup WhatsApp keluarga berikut!",
+                stimulusSVG: `
+                    <div class="bg-[#e5ddd5] p-4 rounded-2xl max-w-md mx-auto border border-slate-300">
+                        <div class="bg-white rounded-xl p-3.5 shadow-sm space-y-1.5 relative">
+                            <div class="flex items-center gap-1 text-[11px] text-slate-400 italic">
+                                <i class="fa-solid fa-share"></i> Diteruskan berkali-kali
+                            </div>
+                            <p class="text-xs font-bold text-rose-600">🚨 INFO DARURAT DARI KEMENTERIAN!! 🚨</p>
+                            <p class="text-xs text-slate-700 leading-relaxed">
+                                Besok malam akan terjadi radiasi sinar kosmik berbahaya dari luar angkasa pukul 00.30 - 03.30 WIB. SEGERA MATIKAN HP DAN JAUHKAN DARI TEMPAT TIDUR KARENA BISA MELEDAK! Sebarkan ke 10 grup sekarang juga demi keselamatan keluarga kita!!
+                            </p>
+                        </div>
+                    </div>
+                `,
+                question: "Ciri-ciri disinformasi (hoaks) yang tampak pada pesan di atas dan langkah verifikasi sebelum berbagi yang tepat adalah...",
+                options: [
+                    "Terdapat label 'Diteruskan berkali-kali' dan kalimat provokatif/memaksa; verifikasi dilakukan dengan mengecek situs cek fakta resmi (seperti TurnBackHoax.id atau Komdigi).",
+                    "Pesan menggunakan huruf kapital yang rapi; verifikasi dilakukan dengan langsung meneruskannya ke grup kelas agar teman ikut mengecek.",
+                    "Pesan menyebutkan waktu kejadian secara spesifik; artinya berita tersebut pasti valid dan harus segera disebar.",
+                    "Tidak mencantumkan tautan web; cara verifikasinya adalah dengan menelepon nomor pengirim pesan."
+                ],
+                correct: 0,
+                shortTopic: "Verifikasi informasi dan identifikasi ciri hoaks sebelum berbagi"
+            },
+            {
+                id: 14,
+                tp: "TP 4",
+                tpTitle: "Diseminasi Bertanggung Jawab",
+                stimulusType: "text",
+                stimulusTitle: "Pengaturan Privasi Platform Saat Diseminasi",
+                stimulusContent: `Kelas 8B merekam video dokumentasi kegiatan pentas seni internal kelas. Dalam video tersebut terdapat wajah seluruh siswa serta penampilan bakat yang memang hanya ditujukan sebagai kenang-kenangan khusus warga kelas 8B dan wali kelas.`,
+                question: "Pengaturan privasi unggahan video di YouTube atau Google Drive yang paling tepat agar menjaga privasi siswa adalah...",
+                options: [
+                    "Mengatur visibilitas menjadi 'Publik' (Public) agar muncul di halaman beranda semua pengguna internet.",
+                    "Mengatur visibilitas menjadi 'Tidak Publik' (Unlisted) atau akses terbatas hanya bagi pemilik tautan yang dibagikan di grup kelas.",
+                    "Mengunggah video dengan judul berisi nama lengkap dan nomor telepon seluruh siswa kelas 8B.",
+                    "Mengatur visibilitas menjadi 'Pribadi' (Private) sehingga wali kelas dan teman sekelas tidak bisa menontonnya."
+                ],
+                correct: 1,
+                shortTopic: "Pengaturan visibilitas/privasi platform saat mendiseminasikan konten"
+            },
+            {
+                id: 15,
+                tp: "TP 4",
+                tpTitle: "Diseminasi Bertanggung Jawab",
+                stimulusType: "text",
+                stimulusTitle: "Dampak Diseminasi Konten Tanpa Izin",
+                stimulusContent: `Saat jam istirahat, Kevin memotret temannya yang sedang tertidur pulas dengan ekspresi lucu di kelas, lalu menjadikannya stiker WhatsApp dan menyebarkannya ke berbagai grup pertemanan tanpa sepengetahuan temannya tersebut.`,
+                question: "Mengapa tindakan Kevin bertentangan dengan prinsip diseminasi konten digital yang bertanggung jawab?",
+                options: [
+                    "Karena kualitas resolusi kamera ponsel Kevin terlalu rendah untuk dijadikan stiker.",
+                    "Karena menyebarkan foto/wajah orang lain tanpa persetujuan (consent) melanggar hak privasi dan berpotensi mempermalukan korban.",
+                    "Karena stiker WhatsApp hanya boleh dibuat menggunakan gambar kartun atau animasi AI.",
+                    "Karena Kevin lupa mencantumkan nama merek ponsel yang digunakan untuk memotret."
+                ],
+                correct: 1,
+                shortTopic: "Etika persetujuan (consent) dan dampak diseminasi terhadap privasi orang lain"
+            }
+        ];
+
+        // State Aplikasi Ujian
+        let examState = {
+            student: {
+                nama: "",
+                kelas: "",
+                absen: ""
+            },
+            currentQuestionIndex: 0,
+            answers: new Array(questionsData.length).fill(null), // Menyimpan index jawaban (0-3) atau null
+            flagged: new Array(questionsData.length).fill(false),
+            timeLeft: 30 * 60, // 30 menit dalam detik
+            timerInterval: null,
+            startTime: null,
+            endTime: null
+        };
+
+        // Fungsi Helper Modal Notifikasi (Menggantikan alert/confirm)
+        function showModal({ title, message, type = "warning", showCancel = false, confirmText = "Ya, Lanjutkan", onConfirm = null }) {
+            const modal = document.getElementById('custom-modal');
+            const iconEl = document.getElementById('modal-icon');
+            const titleEl = document.getElementById('modal-title');
+            const msgEl = document.getElementById('modal-message');
+            const cancelBtn = document.getElementById('modal-cancel-btn');
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+            confirmBtn.textContent = confirmText;
+
+            if (type === "warning") {
+                iconEl.className = "w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0";
+                iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            } else if (type === "success") {
+                iconEl.className = "w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl shrink-0";
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            } else {
+                iconEl.className = "w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center text-xl shrink-0";
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+            }
+
+            if (showCancel) {
+                cancelBtn.classList.remove('hidden');
+            } else {
+                cancelBtn.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            cancelBtn.onclick = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            };
+
+            confirmBtn.onclick = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                if (typeof onConfirm === 'function') onConfirm();
+            };
+        }
+
+        // 1. Inisialisasi Form Mulai Ujian
+        document.getElementById('start-exam-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nama = document.getElementById('input-nama').value.trim();
+            const kelas = document.getElementById('input-kelas').value;
+            const absen = document.getElementById('input-absen').value.trim();
+
+            if (!nama || !kelas || !absen) {
+                showModal({
+                    title: "Data Belum Lengkap",
+                    message: "Silakan lengkapi Nama Lengkap, Kelas, dan Nomor Absen sebelum memulai ujian.",
+                    type: "warning",
+                    confirmText: "Mengerti"
+                });
+                return;
+            }
+
+            examState.student = { nama, kelas, absen };
+            examState.startTime = new Date();
+
+            // Update Header
+            document.getElementById('header-student-name').textContent = `${nama} (${kelas})`;
+            document.getElementById('exam-header-controls').classList.remove('hidden');
+            document.getElementById('exam-header-controls').classList.add('flex');
+
+            // Switch View ke Halaman Ujian
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-exam').classList.remove('hidden');
+
+            // Render Navigasi & Soal Pertama
+            renderNavGrid();
+            renderQuestion(0);
+            startTimer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // 2. Timer Ujian
+        function startTimer() {
+            updateTimerDisplay();
+            examState.timerInterval = setInterval(() => {
+                examState.timeLeft--;
+                updateTimerDisplay();
+
+                if (examState.timeLeft <= 0) {
+                    clearInterval(examState.timerInterval);
+                    showModal({
+                        title: "Waktu Ujian Habis!",
+                        message: "Waktu pengerjaan 30 menit telah berakhir. Jawabanmu akan otomatis dikumpulkan sekarang.",
+                        type: "warning",
+                        confirmText: "Lihat Hasil",
+                        onConfirm: () => finishExam()
+                    });
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(examState.timeLeft / 60);
+            const seconds = examState.timeLeft % 60;
+            const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timer-display').textContent = formatted;
+        }
+
+        // 3. Render Navigasi Nomor Soal (1-15)
+        function renderNavGrid() {
+            const grid = document.getElementById('question-nav-grid');
+            grid.innerHTML = '';
+
+            questionsData.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = idx + 1;
+                btn.onclick = () => renderQuestion(idx);
+
+                let baseClass = "h-10 rounded-xl font-display font-bold text-sm transition flex items-center justify-center ";
+                const isCurrent = idx === examState.currentQuestionIndex;
+                const isAnswered = examState.answers[idx] !== null;
+                const isFlagged = examState.flagged[idx];
+
+                if (isCurrent) {
+                    baseClass += "border-2 border-primary-600 bg-primary-50 text-primary-700 ring-2 ring-primary-500/20 ";
+                } else if (isFlagged) {
+                    baseClass += "bg-amber-400 text-slate-900 shadow-sm ";
+                } else if (isAnswered) {
+                    baseClass += "bg-primary-600 text-white shadow-sm ";
+                } else {
+                    baseClass += "bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 ";
+                }
+
+                btn.className = baseClass;
+                grid.appendChild(btn);
+            });
+
+            // Update Progress Bar
+            const answeredCount = examState.answers.filter(a => a !== null).length;
+            const percent = Math.round((answeredCount / questionsData.length) * 100);
+            document.getElementById('progress-text').textContent = `${answeredCount} / ${questionsData.length} Terjawab`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+        }
+
+        // 4. Render Soal Aktif
+        function renderQuestion(index) {
+            examState.currentQuestionIndex = index;
+            const q = questionsData[index];
+
+            document.getElementById('current-q-number').textContent = index + 1;
+            document.getElementById('tp-badge').textContent = `${q.tp}: ${q.tpTitle}`;
+
+            // Update Tombol Ragu-ragu
+            const flagBtn = document.getElementById('flag-btn');
+            if (examState.flagged[index]) {
+                flagBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-100 border border-amber-300 text-amber-800 transition";
+                flagBtn.innerHTML = '<i class="fa-solid fa-flag text-amber-600"></i> Ditandai Ragu-ragu';
+            } else {
+                flagBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200 transition";
+                flagBtn.innerHTML = '<i class="fa-regular fa-flag"></i> Tandai Ragu-ragu';
+            }
+
+            // Render Stimulus
+            const stimContainer = document.getElementById('stimulus-container');
+            if (q.stimulusType === "text") {
+                stimContainer.innerHTML = `
+                    <div class="bg-slate-50 border-l-4 border-primary-500 rounded-r-2xl p-4 sm:p-5 text-sm text-slate-700 leading-relaxed">
+                        <p class="font-bold text-xs uppercase tracking-wider text-primary-700 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-book-open"></i> ${q.stimulusTitle}
+                        </p>
+                        <p>${q.stimulusContent}</p>
+                    </div>
+                `;
+            } else if (q.stimulusType === "svg") {
+                stimContainer.innerHTML = `
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5">
+                        <p class="font-bold text-xs uppercase tracking-wider text-primary-700 mb-3 text-center">
+                            <i class="fa-solid fa-image mr-1"></i> ${q.stimulusTitle}
+                        </p>
+                        ${q.stimulusSVG}
+                    </div>
+                `;
+            }
+
+            // Render Pertanyaan
+            document.getElementById('question-text').textContent = q.question;
+
+            // Render Opsi A - D
+            const optContainer = document.getElementById('options-container');
+            optContainer.innerHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((optText, optIdx) => {
+                const isSelected = examState.answers[index] === optIdx;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => selectOption(optIdx);
+
+                btn.className = `option-card w-full text-left p-4 rounded-2xl border-2 flex items-start gap-3.5 ${
+                    isSelected 
+                    ? 'border-primary-600 bg-primary-50/70 shadow-sm' 
+                    : 'border-slate-200 bg-white hover:border-primary-300 hover:bg-slate-50'
+                }`;
+
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-xl font-display font-bold text-sm flex items-center justify-center shrink-0 mt-0.5 transition ${
+                        isSelected 
+                        ? 'bg-primary-600 text-white' 
+                        : 'bg-slate-100 text-slate-700'
+                    }">${letters[optIdx]}</span>
+                    <span class="text-sm sm:text-base leading-relaxed ${isSelected ? 'font-semibold text-slate-900' : 'text-slate-700'}">${optText}</span>
+                `;
+
+                optContainer.appendChild(btn);
+            });
+
+            // Atur Tombol Sebelumnya / Selanjutnya / Selesai
+            document.getElementById('prev-btn').disabled = index === 0;
+            if (index === questionsData.length - 1) {
+                document.getElementById('next-btn').classList.add('hidden');
+                document.getElementById('finish-btn').classList.remove('hidden');
+                document.getElementById('finish-btn').classList.add('flex');
+            } else {
+                document.getElementById('next-btn').classList.remove('hidden');
+                document.getElementById('finish-btn').classList.add('hidden');
+                document.getElementById('finish-btn').classList.remove('flex');
+            }
+
+            renderNavGrid();
+        }
+
+        function selectOption(optIdx) {
+            examState.answers[examState.currentQuestionIndex] = optIdx;
+            renderQuestion(examState.currentQuestionIndex);
+        }
+
+        function toggleFlag() {
+            const idx = examState.currentQuestionIndex;
+            examState.flagged[idx] = !examState.flagged[idx];
+            renderQuestion(idx);
+        }
+
+        function prevQuestion() {
+            if (examState.currentQuestionIndex > 0) {
+                renderQuestion(examState.currentQuestionIndex - 1);
+            }
+        }
+
+        function nextQuestion() {
+            if (examState.currentQuestionIndex < questionsData.length - 1) {
+                renderQuestion(examState.currentQuestionIndex + 1);
+            }
+        }
+
+        // 5. Konfirmasi & Selesai Ujian
+        function confirmFinishExam() {
+            const unansweredCount = examState.answers.filter(a => a === null).length;
+            let msg = "Apakah kamu yakin ingin mengumpulkan seluruh jawaban ujian sekarang?";
+            if (unansweredCount > 0) {
+                msg = `Masih terdapat ${unansweredCount} soal yang belum dijawab! Apakah kamu yakin tetap ingin menyelesaikan ujian sekarang?`;
+            }
+
+            showModal({
+                title: "Konfirmasi Pengumpulan Ujian",
+                message: msg,
+                type: unansweredCount > 0 ? "warning" : "info",
+                showCancel: true,
+                confirmText: "Ya, Kumpulkan",
+                onConfirm: () => finishExam()
+            });
+        }
+
+        function finishExam() {
+            clearInterval(examState.timerInterval);
+            examState.endTime = new Date();
+
+            // Sembunyikan header timer & view exam, tampilkan view result
+            document.getElementById('exam-header-controls').classList.add('hidden');
+            document.getElementById('view-exam').classList.add('hidden');
+            document.getElementById('view-result').classList.remove('hidden');
+
+            calculateAndRenderResults();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 6. Kalkulasi Skor & Render Dashboard Hasil
+        let finalReportData = {};
+
+        function calculateAndRenderResults() {
+            let correctCount = 0;
+            const letters = ['A', 'B', 'C', 'D'];
+            const tpStats = {
+                "TP 1": { title: "Konsep & Ancaman", total: 0, correct: 0 },
+                "TP 2": { title: "Produksi & Hak Cipta", total: 0, correct: 0 },
+                "TP 3": { title: "Etika & Privasi Data", total: 0, correct: 0 },
+                "TP 4": { title: "Diseminasi Konten", total: 0, correct: 0 }
+            };
+
+            const tableBody = document.getElementById('review-table-body');
+            tableBody.innerHTML = '';
+
+            const answerSummaryList = [];
+
+            questionsData.forEach((q, idx) => {
+                const userAnsIdx = examState.answers[idx];
+                const isCorrect = userAnsIdx === q.correct;
+                if (isCorrect) correctCount++;
+
+                // Hitung per TP
+                tpStats[q.tp].total++;
+                if (isCorrect) tpStats[q.tp].correct++;
+
+                const userLetter = userAnsIdx !== null ? letters[userAnsIdx] : "-";
+                const userOptionText = userAnsIdx !== null ? q.options[userAnsIdx] : "Tidak Dijawab";
+                const correctLetter = letters[q.correct];
+
+                answerSummaryList.push(`${idx + 1}.${userLetter}${isCorrect ? '✓' : '✗'}`);
+
+                // Render Baris Tabel Rekap
+                const tr = document.createElement('tr');
+                tr.className = isCorrect ? "bg-white" : "bg-rose-50/40";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-center text-slate-700">${idx + 1}</td>
+                    <td class="py-3 px-4">
+                        <span class="inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-600 mb-1">${q.tp}</span>
+                        <p class="font-medium text-slate-800">${q.shortTopic}</p>
+                        ${!isCorrect ? `<p class="text-xs text-emerald-700 mt-1"><i class="fa-solid fa-key mr-1"></i>Kunci Benar: <strong>${correctLetter}</strong> (${q.options[q.correct]})</p>` : ''}
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs ${
+                            userAnsIdx === null ? 'bg-slate-200 text-slate-600' : (isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700')
+                        }">${userLetter}</span>
+                        <p class="text-[11px] text-slate-500 mt-1 line-clamp-1" title="${userOptionText}">${userOptionText}</p>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        ${isCorrect 
+                            ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600"><i class="fa-solid fa-circle-check"></i> Benar</span>' 
+                            : '<span class="inline-flex items-center gap-1 text-xs font-bold text-rose-600"><i class="fa-solid fa-circle-xmark"></i> Salah</span>'
+                        }
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            const wrongCount = questionsData.length - correctCount;
+            const finalScore = Math.round((correctCount / questionsData.length) * 100);
+            const isPassed = finalScore >= 75;
+
+            // Hitung Durasi
+            const totalSecondsUsed = (30 * 60) - examState.timeLeft;
+            const minsUsed = Math.floor(totalSecondsUsed / 60);
+            const secsUsed = totalSecondsUsed % 60;
+            const durationText = `${minsUsed} menit ${secsUsed} detik`;
+
+            // Format Tanggal
+            const nowStr = examState.endTime.toLocaleString('id-ID', {
+                day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            // Simpan data untuk WA & PDF
+            finalReportData = {
+                nama: examState.student.nama,
+                kelas: examState.student.kelas,
+                absen: examState.student.absen,
+                score: finalScore,
+                correct: correctCount,
+                wrong: wrongCount,
+                status: isPassed ? "TUNTAS (LULUS KKTP)" : "PERLU REMEDIAL",
+                duration: durationText,
+                timestamp: nowStr,
+                answerCodes: answerSummaryList.join(", ")
+            };
+
+            // Isi Elemen DOM Hasil
+            document.getElementById('res-nama').textContent = finalReportData.nama;
+            document.getElementById('res-kelas-absen').textContent = `${finalReportData.kelas} / No. Absen ${finalReportData.absen}`;
+            document.getElementById('res-durasi').textContent = finalReportData.duration;
+            document.getElementById('res-timestamp').textContent = `Selesai: ${finalReportData.timestamp} WIB`;
+            document.getElementById('res-score').textContent = finalScore;
+            document.getElementById('res-correct').textContent = `${correctCount} Soal`;
+            document.getElementById('res-wrong').textContent = `${wrongCount} Soal`;
+
+            const statusBadge = document.getElementById('res-status-badge');
+            if (isPassed) {
+                statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800";
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> TUNTAS (LULUS KKTP)';
+            } else {
+                statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800";
+                statusBadge.innerHTML = '<i class="fa-solid fa-rotate-right"></i> PERLU BIMBINGAN / REMEDIAL';
+            }
+
+            // Render Analisis per TP
+            const tpGrid = document.getElementById('tp-analysis-grid');
+            tpGrid.innerHTML = '';
+            Object.keys(tpStats).forEach(tpKey => {
+                const stat = tpStats[tpKey];
+                const pct = Math.round((stat.correct / stat.total) * 100);
+                const card = document.createElement('div');
+                card.className = "p-4 rounded-2xl border border-slate-200 bg-slate-50/70";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-xs text-primary-700">${tpKey}</span>
+                        <span class="text-xs font-extrabold ${pct >= 70 ? 'text-emerald-600' : 'text-amber-600'}">${stat.correct}/${stat.total} Benar (${pct}%)</span>
+                    </div>
+                    <p class="text-xs text-slate-600 font-medium mb-2">${stat.title}</p>
+                    <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                        <div class="h-full ${pct >= 70 ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${pct}%"></div>
+                    </div>
+                `;
+                tpGrid.appendChild(card);
+            });
+        }
+
+        // 7. Fitur Kirim Laporan Lengkap ke WhatsApp (081372966011)
+        function sendToWhatsApp() {
+            const letters = ['A', 'B', 'C', 'D'];
+            let detailPilihan = "";
+            questionsData.forEach((q, idx) => {
+                const ans = examState.answers[idx];
+                const chosen = ans !== null ? letters[ans] : "-";
+                const mark = ans === q.correct ? "✅" : "❌";
+                detailPilihan += `No.${idx + 1}: *${chosen}* ${mark}\n`;
+            });
+
+            const message = 
+`*LAPORAN HASIL UJIAN HARIAN KKA (KELAS 8)*
+*Materi: Diseminasi Konten Digital, Etika & Keamanan*
+------------------------------------
+👤 *Nama:* ${finalReportData.nama}
+🏫 *Kelas:* ${finalReportData.kelas} (Absen: ${finalReportData.absen})
+⏱️ *Durasi:* ${finalReportData.duration}
+📅 *Waktu:* ${finalReportData.timestamp}
+------------------------------------
+🏆 *NILAI AKHIR: ${finalReportData.score}*
+✅ Benar: ${finalReportData.correct} | ❌ Salah: ${finalReportData.wrong}
+📌 Status: *${finalReportData.status}*
+------------------------------------
+📋 *Rincian Pilihan Jawaban Siswa:*
+${detailPilihan}
+_Dikirim otomatis melalui Aplikasi Ujian KKA SMP_`;
+
+            const encodedMessage = encodeURIComponent(message);
+            const waUrl = `https://wa.me/${TEACHER_WA_NUMBER}?text=${encodedMessage}`;
+            window.open(waUrl, '_blank');
+        }
+
+        // 8. Fitur Download Laporan Hasil Ujian ke Format PDF
+        function downloadPDF() {
+            const element = document.getElementById('pdf-report-area');
+            const btn = document.getElementById('btn-download-pdf');
+            const originalHTML = btn.innerHTML;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses PDF...';
+
+            const safeName = finalReportData.nama.replace(/[^a-zA-Z0-9]/g, '_');
+            const filename = `Hasil_Ujian_KKA_${finalReportData.kelas}_${safeName}.pdf`;
+
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }).catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                showModal({
+                    title: "Gagal Mengunduh PDF",
+                    message: "Terjadi kendala saat membuat file PDF. Silakan coba lagi.",
+                    type: "warning",
+                    confirmText: "Tutup"
+                });
+            });
+        }
+    </script>
+</body>
+</html>
